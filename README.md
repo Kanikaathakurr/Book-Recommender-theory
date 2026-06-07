@@ -295,3 +295,245 @@ Thus, the system recommends books based on meaning rather than exact keyword mat
 **Semantic search** works by comparing the embedding of a user query with the embeddings of stored documents and returning the most similar results.
 
 This is the theoretical foundation behind modern recommendation systems, retrieval systems, RAG applications, and AI-powered search engines.
+
+### 6. Zero-Shot Text Classification using LLMs
+
+#### Why Text Classification?
+
+The original dataset contains a **categories** column with many inconsistent and messy labels. To make the recommender system more useful, these categories can be grouped into a smaller set of meaningful classes (e.g., Fiction, Non-Fiction, History, Science, Children's Books, etc.).
+
+This allows category-based filtering in addition to semantic search.
+
+---
+
+#### What is Text Classification?
+
+Text Classification is a Natural Language Processing (NLP) task where a piece of text is assigned to one of several predefined categories.
+
+**Example:**
+
+**Input:**
+
+```text
+"A heartwarming journey of love and friendship."
+```
+
+**Possible Categories:**
+
+```text
+Fiction
+Non-Fiction
+```
+
+**Output:**
+
+```text
+Fiction
+```
+
+---
+
+#### What is Zero-Shot Classification?
+
+Zero-Shot Classification is a technique where a pre-trained language model classifies text **without being specifically trained on the classification task**.
+
+Instead of training a custom classifier, we provide:
+
+1. The text to classify
+2. A list of candidate categories
+
+The model then predicts the most suitable category based on its existing knowledge.
+
+**Example Prompt:**
+
+```text
+Classify the following book description into one of these categories:
+
+Categories:
+- Fiction
+- Non-Fiction
+
+Description:
+"A heartwarming journey of love and friendship."
+```
+
+**Prediction:**
+
+```text
+Fiction
+```
+
+---
+
+#### Why Can LLMs Perform Zero-Shot Classification?
+
+Large transformer models are trained on massive amounts of text from sources such as:
+
+- Wikipedia
+- News Articles
+- Book Descriptions
+- Reviews
+- Blogs
+- Educational Content
+
+During training, they learn relationships between words, topics, and concepts.
+
+For example, the model may repeatedly encounter:
+
+```text
+Love stories
+Family dramas
+Fantasy adventures
+```
+
+associated with:
+
+```text
+Fiction
+```
+
+Similarly:
+
+```text
+Biographies
+Historical accounts
+Scientific explanations
+```
+
+are often associated with:
+
+```text
+Non-Fiction
+```
+
+As a result, the model develops an understanding of which descriptions are likely to belong to which categories.
+
+---
+
+#### How Transformers Enable Classification
+
+Transformers learn semantic relationships between words through self-attention.
+
+For example:
+
+```text
+"A heartwarming journey of love and friendship"
+```
+
+contains concepts such as:
+
+```text
+love
+friendship
+relationships
+storytelling
+```
+
+These concepts are strongly associated with fictional narratives.
+
+When asked to classify the text, the model compares it to patterns learned during pretraining and predicts the most appropriate category.
+
+---
+
+#### Difference Between Semantic Search and Classification
+
+##### Semantic Search (Previous Section)
+
+Purpose:
+
+```text
+Find similar books.
+```
+
+Pipeline:
+
+```text
+Book Description
+       ↓
+MiniLM Transformer
+       ↓
+Embedding Vector
+       ↓
+Chroma Vector Database
+       ↓
+Similarity Search
+```
+
+Output:
+
+```text
+Top K similar books
+```
+
+---
+
+##### Zero-Shot Classification
+
+Purpose:
+
+```text
+Determine the category of a book.
+```
+
+Pipeline:
+
+```text
+Book Description
+       ↓
+LLM
+       ↓
+Category Label
+```
+
+Output:
+
+```text
+Fiction
+Non-Fiction
+History
+Science
+...
+```
+
+---
+
+#### Benefits for the Recommender System
+
+Adding classification enables filtering recommendations by category.
+
+**Before:**
+
+```text
+User Query
+      ↓
+Semantic Search
+      ↓
+Similar Books
+```
+
+**After:**
+
+```text
+User Query
+      ↓
+Semantic Search
+      ↓
+Similar Books
+      ↓
+Category Filter
+      ↓
+Final Recommendations
+```
+
+This improves recommendation quality by ensuring books are both semantically relevant and belong to the desired category.
+
+---
+
+#### Key Takeaways
+
+- Text Classification assigns text to predefined categories.
+- Zero-Shot Classification allows classification without additional model training.
+- Transformers can perform zero-shot classification because they learn semantic relationships during pretraining.
+- Semantic Search finds similar books using embeddings.
+- Classification assigns category labels to books.
+- Combining both techniques produces a more powerful and flexible recommender system.
