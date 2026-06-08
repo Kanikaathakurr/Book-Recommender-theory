@@ -906,3 +906,236 @@ Filter: Sadness
 ### Key Takeaway
 
 Instead of using a general zero-shot classifier, this section uses a **RoBERTa model that was already fine-tuned for emotion recognition**, allowing the recommender system to understand the emotional tone of books and provide more personalized recommendations.
+
+Extracting Emotions from Book Descriptions
+Problem
+
+A book description usually contains multiple sentences, and each sentence can express a different emotion.
+This is the **core logic of the sentiment analysis section**. For your notes:
+
+## Converting Sentence-Level Emotions into Book-Level Emotion Scores
+
+### Problem
+
+After splitting a book description into sentences, the emotion classifier returns emotion scores for every sentence.
+
+Example:
+
+```text id="h6i0rr"
+Sentence 1 → Joy = 0.80
+Sentence 2 → Fear = 0.75
+Sentence 3 → Sadness = 0.60
+```
+
+A single book can therefore contain multiple emotions.
+
+---
+
+### Challenge
+
+The classifier output is returned in **score order**, meaning the order of emotions can be different for each sentence.
+
+Example:
+
+```text id="0y0it7"
+Sentence 1:
+Joy
+Fear
+Sadness
+
+Sentence 2:
+Fear
+Joy
+Surprise
+```
+
+This makes it difficult to compare emotions across sentences.
+
+---
+
+### Solution
+
+First, sort the emotion predictions so that every sentence follows the same emotion order:
+
+```text id="dkq0az"
+anger
+disgust
+fear
+joy
+neutral
+sadness
+surprise
+```
+
+Now the same emotion always appears in the same position.
+
+---
+
+### Emotion Labels
+
+A list of all emotion names is created:
+
+```text id="z9ekv0"
+anger
+disgust
+fear
+joy
+neutral
+sadness
+surprise
+```
+
+These labels later become the columns of the final dataframe.
+
+---
+
+### ISBN List
+
+An empty ISBN list is created.
+
+Purpose:
+
+```text id="u11pjp"
+Store each book's ISBN
+Use ISBN later to merge emotion data
+back into the main books dataframe
+```
+
+---
+
+### Emotion Scores Dictionary
+
+A dictionary is created to store scores for each emotion.
+
+Conceptually:
+
+```python id="y9o9n2"
+{
+    "anger": [],
+    "disgust": [],
+    "fear": [],
+    "joy": [],
+    ...
+}
+```
+
+---
+
+### calculate_max_emotion_scores()
+
+A helper function is created.
+
+For a single book description:
+
+1. Loop through all sentence predictions.
+2. Group scores by emotion.
+3. Collect all scores for each emotion.
+4. Take the maximum score for every emotion.
+
+Example:
+
+```text id="oqk53j"
+Joy Scores:
+0.20
+0.85
+0.10
+
+Maximum Joy:
+0.85
+```
+
+The same is done for all emotions.
+
+---
+
+### Why Use Maximum Scores?
+
+The goal is to capture whether an emotion appears strongly anywhere in the description.
+
+Example:
+
+```text id="4n58zt"
+Sentence 1 → Joy = 0.05
+Sentence 2 → Joy = 0.90
+Sentence 3 → Joy = 0.15
+```
+
+Final Joy score:
+
+```text id="8mg3ik"
+0.90
+```
+
+This preserves strong emotional signals that might otherwise be averaged away.
+
+---
+
+### Processing Each Book
+
+For every book:
+
+1. Save ISBN.
+2. Split description into sentences.
+3. Run the emotion classifier on all sentences.
+4. Calculate maximum emotion scores.
+5. Store the results in the emotion dictionary.
+
+Workflow:
+
+```text id="t5rd1w"
+Book Description
+        ↓
+Split into Sentences
+        ↓
+Emotion Classifier
+        ↓
+Sentence-Level Scores
+        ↓
+Maximum Score per Emotion
+        ↓
+Book Emotion Profile
+```
+
+---
+
+### Creating the Emotion DataFrame
+
+After processing all books, the emotion dictionary is converted into a dataframe.
+
+Example:
+
+| isbn13 | joy  | fear | sadness | surprise | anger | disgust | neutral |
+| ------ | ---- | ---- | ------- | -------- | ----- | ------- | ------- |
+| 978... | 0.85 | 0.62 | 0.21    | 0.40     | 0.03  | 0.01    | 0.18    |
+
+Each row represents one book.
+
+---
+
+### Merging with the Main Dataset
+
+The emotion dataframe is merged back into the books dataframe using:
+
+```text id="ofg7x8"
+isbn13
+```
+
+as the key.
+
+This adds seven new emotion columns to every book.
+
+---
+
+### Final Result
+
+Each book now contains:
+
+```text id="azqj33"
+Book Information
++
+Category
++
+Emotion Scores
+```
+
+allowing recommendations to be filtered not only by topic and genre but also by emotional tone.
