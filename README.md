@@ -296,7 +296,7 @@ Thus, the system recommends books based on meaning rather than exact keyword mat
 
 This is the theoretical foundation behind modern recommendation systems, retrieval systems, RAG applications, and AI-powered search engines.
 
-### 6. Zero-Shot Text Classification using LLMs
+### 3. Zero-Shot Text Classification using LLMs
 
 #### Why Text Classification?
 
@@ -513,7 +513,7 @@ Similar Books
 
 **After:**
 
-```text
+````text
 User Query
       ↓
 Semantic Search
@@ -523,7 +523,7 @@ Similar Books
 Category Filter
       ↓
 Final Recommendations
-```
+```git status
 
 This improves recommendation quality by ensuring books are both semantically relevant and belong to the desired category.
 
@@ -537,3 +537,372 @@ This improves recommendation quality by ensuring books are both semantically rel
 - Semantic Search finds similar books using embeddings.
 - Classification assigns category labels to books.
 - Combining both techniques produces a more powerful and flexible recommender system.
+
+For your GitHub notes, you can write:
+
+## Sentiment Analysis using LLMs
+
+### Objective
+
+After building semantic search and category classification, the next step is to determine the **emotional tone** of each book description. This allows users to filter recommendations based on how a book feels rather than just its topic or genre.
+
+Examples:
+
+* Joyful books for uplifting reads
+* Suspenseful books for excitement
+* Emotional books for deeper stories
+
+---
+
+### Emotion Categories
+
+Each book description is classified into one of the following emotions:
+
+```text id="lrxj49"
+Anger
+Disgust
+Fear
+Joy
+Sadness
+Surprise
+Neutral
+````
+
+Example:
+
+```text id="i17i7h"
+"A heartwarming journey of love and friendship."
+```
+
+Predicted Emotion:
+
+```text id="oiv3ku"
+Joy
+```
+
+---
+
+### Why Use Sentiment Analysis?
+
+Traditional recommender systems usually rely on:
+
+- Ratings
+- User interactions
+- Purchase history
+
+Since this project uses **text descriptions**, we can extract additional information such as emotional tone and use it as another recommendation filter.
+
+---
+
+### Zero-Shot Classification vs Fine-Tuning
+
+#### Previous Section: Zero-Shot Classification
+
+Used a pretrained model directly without additional training.
+
+```text id="z1gzxt"
+Book Description
+        ↓
+Pretrained LLM
+        ↓
+Fiction / Nonfiction
+```
+
+The model already knew how to classify categories from its original training.
+
+---
+
+#### This Section: Fine-Tuned Model
+
+Instead of using a generic model, a model that has already been fine-tuned specifically for emotion detection is used.
+
+```text id="0g0kag"
+Book Description
+        ↓
+Emotion Classification Model
+        ↓
+Joy / Fear / Sadness / etc.
+```
+
+---
+
+### What is Fine-Tuning?
+
+Fine-tuning is the process of taking a pretrained language model and training it further on a smaller task-specific dataset.
+
+#### Original Model
+
+A model such as RoBERTa is initially trained on general language tasks.
+
+```text id="4x3qk9"
+Text
+ ↓
+Word Embeddings
+ ↓
+Transformer Encoder Layers
+ ↓
+Masked Word Prediction
+```
+
+---
+
+#### Fine-Tuning for Emotion Detection
+
+The original prediction layer is removed and replaced with a new classification layer.
+
+```text id="lv4a74"
+Text
+ ↓
+Word Embeddings
+ ↓
+Transformer Encoder Layers
+ ↓
+Emotion Classification Layer
+ ↓
+Emotion Label
+```
+
+The model is then trained on a labeled dataset containing:
+
+```text id="gm7t3m"
+Text → Emotion
+```
+
+Examples:
+
+```text id="d9xx4e"
+"I am very happy today." → Joy
+
+"I am terrified." → Fear
+
+"This is heartbreaking." → Sadness
+```
+
+---
+
+### Why Fine-Tuning Works
+
+The transformer encoder layers already understand language because they were trained on massive amounts of text.
+
+Fine-tuning keeps this language knowledge and only learns how to map that knowledge to emotion labels.
+
+As a result:
+
+```text id="4m1qaw"
+Pretrained Language Understanding
+                +
+Emotion Training Data
+                ↓
+Emotion Classifier
+```
+
+---
+
+### How Sentiment Analysis Improves the Recommender
+
+The recommender can now filter books by:
+
+1. Semantic similarity
+2. Category (Fiction / Nonfiction)
+3. Genre
+4. Emotional tone
+
+```text id="naw7g5"
+User Query
+      ↓
+Semantic Search
+      ↓
+Category Filter
+      ↓
+Genre Filter
+      ↓
+Emotion Filter
+      ↓
+Final Recommendations
+```
+
+### Key Takeaway
+
+Semantic search finds books with similar meaning, category classification identifies what type of book it is, and sentiment analysis identifies the emotional tone of the book, making recommendations more personalized.
+
+## Finding a Fine-Tuned LLM for Sentiment Analysis
+
+### Objective
+
+Instead of using zero-shot classification, this section uses a **pretrained and fine-tuned emotion classification model** from Hugging Face to detect the emotional tone of book descriptions.
+
+---
+
+### Why Use a Fine-Tuned Model?
+
+In the previous section, a general-purpose model (`BART-MNLI`) was used for zero-shot classification.
+
+For emotion detection, a model that has already been specifically trained on emotion-labeled text can provide better results.
+
+```text id="clmjlwm"
+General Model
+      ↓
+Can classify many tasks
+
+Fine-Tuned Model
+      ↓
+Specialized for emotion detection
+```
+
+---
+
+### Selecting a Model
+
+On Hugging Face:
+
+1. Choose **Text Classification**
+2. Search for **emotion**
+3. Browse popular emotion-classification models
+
+The tutor selected a **RoBERTa-based model** that was fine-tuned for emotion recognition.
+
+---
+
+### Emotions Predicted
+
+The selected model predicts:
+
+```text id="8qq0mq"
+Anger
+Disgust
+Fear
+Joy
+Sadness
+Surprise
+Neutral
+```
+
+These are the same emotion categories discussed earlier.
+
+---
+
+### Why Not Use the Most Popular Model?
+
+The most popular emotion model contained dozens of emotion labels.
+
+For this project, that level of detail is unnecessary.
+
+A model with the seven basic emotions is:
+
+- Simpler
+- Easier to interpret
+- Better suited for recommendation filtering
+
+---
+
+### Understanding the Model
+
+The selected model is built on **RoBERTa**, a transformer model.
+
+Originally:
+
+```text id="f56e5r"
+Text
+ ↓
+RoBERTa Encoder
+ ↓
+Masked Word Prediction
+```
+
+After fine-tuning:
+
+```text id="65br7n"
+Text
+ ↓
+RoBERTa Encoder
+ ↓
+Emotion Classification Layer
+ ↓
+Emotion Label
+```
+
+The language understanding learned during pretraining is preserved, while the final layer is trained specifically for emotion prediction.
+
+---
+
+### Model Performance
+
+The model achieved:
+
+```text id="t8eik4"
+Accuracy ≈ 66%
+```
+
+For comparison:
+
+Random guessing across 7 emotion categories would achieve approximately:
+
+\frac{100}{7}\approx 14.3%
+
+So the model performs substantially better than chance.
+
+---
+
+### Why This Accuracy Is Acceptable
+
+Emotion detection is a difficult task because:
+
+- Emotions can overlap.
+- Some descriptions contain multiple emotions.
+- Many descriptions are emotionally neutral.
+
+An accuracy of around 66% is considered reasonable for a 7-class emotion classification problem.
+
+---
+
+### How It Will Be Used
+
+Each book description will be passed through the emotion classifier.
+
+```text id="8bivlj"
+Book Description
+        ↓
+Fine-Tuned RoBERTa Model
+        ↓
+Emotion Prediction
+```
+
+Example:
+
+```text id="7o0flg"
+"A heartwarming journey of love and friendship."
+```
+
+Output:
+
+```text id="a5nh2w"
+Joy
+```
+
+---
+
+### Purpose in the Recommender System
+
+The detected emotion becomes another feature that users can filter by.
+
+Examples:
+
+```text id="s6j63v"
+User wants an uplifting book
+        ↓
+Filter: Joy
+
+User wants a suspenseful story
+        ↓
+Filter: Fear / Surprise
+
+User wants something emotional
+        ↓
+Filter: Sadness
+```
+
+---
+
+### Key Takeaway
+
+Instead of using a general zero-shot classifier, this section uses a **RoBERTa model that was already fine-tuned for emotion recognition**, allowing the recommender system to understand the emotional tone of books and provide more personalized recommendations.
